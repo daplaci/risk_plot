@@ -41,7 +41,7 @@ class Plot{
     this.y = y
     this.ylabel = ylabel
     this.xlabel = xlabel
-    this.length_axis = 400
+    this.length_axis = 350
     this.curve = {};
     this.completed_curves = {}; 
     this.b = 365; //brightness (365 values)
@@ -49,6 +49,7 @@ class Plot{
   }
   
   draw_plot(t, xvalue, yvalue, time){
+    push()
     translate(this.x, this.y,)
 
     if (this.curve[t] == undefined) {
@@ -114,6 +115,7 @@ class Plot{
       }
     }
     pop()
+    pop()
   }
 }
 
@@ -126,7 +128,7 @@ function clear_plot(){
 
 function setup() {
   console.log("Starting")
-  createCanvas(1600, 600);
+  createCanvas(1600, 800);
   pt = new Array()
   for (var i = 0; i < total_patients; i++){
     pt.push(new Patient(false))
@@ -135,12 +137,13 @@ function setup() {
     pt.push(new Patient(true))
   }
   slider = createSlider(0, 0.5, 0, 0.005);
-  slider.position(580, 650);
+  slider.position(580, height+50);
   slider.style('width', '80px');
   
   auroc = new Plot(width_scatter+100, height-15,'TPR', 'FPR'); 
+  auprc = new Plot(width_scatter+100, height/2,'Precision', 'Recall'); 
   clearButton = createButton('Clear');
-  clearButton.position(580, 680);
+  clearButton.position(580, height+80);
   clearButton.mousePressed(clear_plot);
 }
 
@@ -174,6 +177,7 @@ function draw() {
   pop()
 
   auroc.draw_plot(threshold, coords[1], coords[0], time)
+  auprc.draw_plot(threshold, coords[0], coords[2], time)
   
   time += (PI/4)*speed; //time step update threshold at next time step
 }
