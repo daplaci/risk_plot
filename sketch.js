@@ -4,7 +4,10 @@
 let slider 
 var left_margin = 60
 var width_scatter = 600
+var prevalence = 0.5
+var total_patients = 600
 var time = 0;
+var speed = 1/30
 
 class Patient{
   constructor(is_positive){
@@ -31,76 +34,148 @@ class Patient{
     ellipse(this.x, this.y, 10, 10)
   }
 }
+
+class Plot{
+  constructor(x, y, ylabel, xlabel){
+    this.x = x
+    this.y = y
+    this.ylabel = ylabel
+    this.xlabel = xlabel
+    this.length_axis = 400
+    this.curve = {};
+    this.completed_curves = {}; 
+    this.b = 365; //brightness (365 values)
+    this.s = 100; //saturation (365 values)
+  }
   
+  draw_plot(t, xvalue, yvalue, time){
+    translate(this.x, this.y,)
+
+    if (this.curve[t] == undefined) {
+      this.curve[t] = [];
+      this.completed_curves[t] = [];
+    }
+    
+    push()
+    // x,y axis
+    strokeWeight(4)
+    stroke(0)
+    line(0, -this.length_axis, 0, 0) //yaxis - length heigth - 25
+    triangle(0, -this.length_axis, -10, -this.length_axis +10, +10, -this.length_axis +10) //yaxis arrow
+    push()
+    fill(0)
+    strokeWeight(1)
+    text(this.ylabel, +15, -this.length_axis +10)
+    pop()
+    
+    line(0, 0, this.length_axis, 0) //xaxis - length heigth
+    triangle(this.length_axis, 0, this.length_axis-10, -10, this.length_axis-10, +10) //xaxis arrow
+    push()
+    fill(0)
+    strokeWeight(1)
+    text(this.xlabel, this.length_axis - 10, -15)
+    pop()
+
+    if (cos(time)*sin(time)>0){
+      this.curve[t].push([xvalue, - yvalue])
+      if (
+        (this.completed_curves[t].length < this.curve[t].length) | 
+        (this.completed_curves[t].length == 0)
+      ){
+        this.completed_curves[t].push([xvalue, - yvalue])
+      }
+    }else{
+      this.curve[t].pop()
+    }
+    
+    colorMode(HSB, 360);
+    strokeWeight(2)
+    beginShape();
+    stroke(color(t*360, this.s, this.b))
+    noFill();
+    for (let i = 0; i < this.curve[t].length; i++) {
+      vertex(
+        this.curve[t][i][0]*(this.length_axis),
+        this.curve[t][i][1]*(this.length_axis)
+        );
+    } endShape();
+    
+    for (let k in this.completed_curves){
+      if (k!=t){
+        beginShape();
+        noFill();
+        stroke(color(k*360,  this.s, this.b))
+        for (let i = 0; i < this.completed_curves[k].length; i++) {
+          vertex(
+            this.completed_curves[k][i][0]*(this.length_axis), 
+            this.completed_curves[k][i][1]*(this.length_axis)
+            );
+        } endShape();
+      }
+    }
+    pop()
+  }
+}
+
+function clear_plot(){
+  auroc.curve = {};
+  auroc.completed_curves = {};
+  auprc.curve = {};
+  auprc.completed_curves = {};
+}
+
 function setup() {
   console.log("Starting")
   createCanvas(1600, 600);
   pt = new Array()
-  curve = new Array();
-  for (var i = 0; i < 200; i++){
+  for (var i = 0; i < total_patients; i++){
     pt.push(new Patient(false))
   }
-  for (var i = 0; i < 200; i++){
+  for (var i = 0; i < total_patients*prevalence; i++){
     pt.push(new Patient(true))
   }
   slider = createSlider(0, 0.5, 0, 0.005);
   slider.position(580, 650);
   slider.style('width', '80px');
+  
+  auroc = new Plot(width_scatter+100, height-15,'TPR', 'FPR'); 
+  clearButton = createButton('Clear');
+  clearButton.position(580, 680);
+  clearButton.mousePressed(clear_plot);
 }
 
 function draw() {
   background(255)
-  let val = slider.value();
-  
-  push()
-  // x,y axis
-  strokeWeight(4)
-  stroke(0)
-  line(width_scatter+100, 10, width_scatter+100, height-15) //yaxis - length heigth - 25
-  triangle(width_scatter+100, 10, width_scatter+90, 20, width_scatter+110, 20) //yaxis arrow
-  
-  line(width_scatter+100, height-15, width_scatter+100+height, height-15) //xaxis - length heigth
-  triangle(width_scatter+100+height, height-15, width_scatter+100+height-10, height-25, width_scatter+100+height-10, height-5) //xaxis arrow
-  pop()
-  
+  let threshold = slider.value();
+    
   for (var i = 0; i < pt.length; i++){ //plot patients
-    pt[i].show(val)
+    pt[i].show(threshold)
   }
   
   t = abs(cos(time))
+  coords = get_roc_coordinates(t)
+
   push()
   fill(255, 0, 0, 20)
   rect(left_margin, 0, (width_scatter-left_margin), t*height); //rect above threshold
   fill(0, 0, 255, 20)
   rect(left_margin, t*height +1, (width_scatter-left_margin), height); //rect below threshold
   
-  strokeWeight(4)
   stroke(0)
+  strokeWeight(4)
   line(left_margin, t*height, width_scatter, t*height) //threshold line
-  
-  strokeWeight(1)
-  
-  coords = get_roc_coordinates(t)
-  line(width_scatter, t*height, (width_scatter+100 + coords[1]*(height)), (height-15 - coords[0]*(height-25))) //line from threshold to roc point
-  
-  translate(width_scatter+100, height-15,)
-  
-  if (cos(time)*sin(time)>0){
-    curve.push([coords[1]*(height), - coords[0]*(height-25)])
-  }else{
-    curve.pop()
-  }
-  
-  beginShape();
-  noFill();
-
-  for (let i = 0; i < curve.length; i++) {
-    vertex(curve[i][0], curve[i][1]);
-  } endShape();
-  
   pop()
+
+  //line from threshold to roc point
+  push()
+  strokeWeight(1)
+  stroke(color(0, 0, 0, 100))
+  line(width_scatter, t*height, (auroc.x+ coords[1]*(auroc.length_axis)), (auroc.y - coords[0]*(auroc.length_axis)))
+  pop()
+
+  auroc.draw_plot(threshold, coords[1], coords[0], time)
   
-  time += (PI/4)/50;
+  time += (PI/4)*speed; //time step update threshold at next time step
 }
 
 function get_roc_coordinates(t){
@@ -125,6 +200,6 @@ function get_roc_coordinates(t){
   }
   var tpr = tp/(tp+fn)
   var fpr = fp/(fp+tn)
-  return [tpr, fpr]
+  var precision = tp/(tp+fp)
+  return [tpr, fpr, precision]
 }
-
