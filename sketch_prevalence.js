@@ -5,7 +5,7 @@ let slider
 var left_margin = 60
 var width_scatter = 600
 var total_width = 1600
-var total_height = 800
+var total_height = 600
 var total_patients = 600
 var time = 0;
 var speed = 1/30
@@ -42,7 +42,7 @@ class Plot{
     this.y = y
     this.ylabel = ylabel
     this.xlabel = xlabel
-    this.length_axis = 350
+    this.length_axis = 280
     this.curve = {};
     this.completed_curves = {}; 
     this.b = 365; //brightness (365 values)
@@ -130,8 +130,8 @@ function clear_plot(){
 function setup() {
   console.log("Starting")
   createCanvas(total_width, total_height);
-  positives = createSlider(1, total_patients/2, total_patients/2, 1);
-  positives.position(580, height+50);
+  positives = createSlider(0, 1, 1, 0.01);
+  positives.position(left_margin, height+50);
   positives.style('width', '80px');
   
   pt = new Array()
@@ -143,9 +143,9 @@ function setup() {
   }
   
   auroc = new Plot(width_scatter+100, height-15,'TPR', 'FPR'); 
-  auprc = new Plot(width_scatter+100, height/2,'Precision', 'Recall'); 
+  auprc = new Plot(width_scatter+100, height/2 -15,'Precision', 'Recall'); 
   clearButton = createButton('Clear');
-  clearButton.position(580, height+80);
+  clearButton.position(left_margin, height+80);
   clearButton.mousePressed(clear_plot);
 }
 
@@ -159,14 +159,14 @@ function draw() {
     }
   }
 
-  if (counter > positives.value()){
+  if (counter >= positives.value()*(total_patients/2)){
     //pop n patients
-    for (var i = 0; i < (counter - positives.value()); i++){
+    for (var i = 0; i < (counter - positives.value()*(total_patients/2)); i++){
       pt.pop()
     }
   } else {
     //push n patients
-    for (var i = 0; i < (positives.value() - counter); i++){
+    for (var i = 0; i < (positives.value()*(total_patients/2) - counter); i++){
       pt.push(new Patient(true))
     }
   }
@@ -194,6 +194,7 @@ function draw() {
   strokeWeight(1)
   stroke(color(0, 0, 0, 100))
   line(width_scatter, t*height, (auroc.x+ coords[1]*(auroc.length_axis)), (auroc.y - coords[0]*(auroc.length_axis)))
+  line(width_scatter, t*height, (auprc.x+ coords[0]*(auprc.length_axis)), (auprc.y - coords[2]*(auprc.length_axis)))
   pop()
 
   auroc.draw_plot(positives.value(), coords[1], coords[0], time)

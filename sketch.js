@@ -4,7 +4,8 @@
 let slider 
 var left_margin = 60
 var width_scatter = 600
-var prevalence = 0.5
+var total_width = 1600
+var total_height = 600
 var total_patients = 600
 var time = 0;
 var speed = 1/30
@@ -41,7 +42,7 @@ class Plot{
     this.y = y
     this.ylabel = ylabel
     this.xlabel = xlabel
-    this.length_axis = 350
+    this.length_axis = 280
     this.curve = {};
     this.completed_curves = {}; 
     this.b = 365; //brightness (365 values)
@@ -128,7 +129,7 @@ function clear_plot(){
 
 function setup() {
   console.log("Starting")
-  createCanvas(1600, 800);
+  createCanvas(total_width, total_height);
   pt = new Array()
   for (var i = 0; i < total_patients; i++){
     pt.push(new Patient(false))
@@ -174,6 +175,7 @@ function draw() {
   strokeWeight(1)
   stroke(color(0, 0, 0, 100))
   line(width_scatter, t*height, (auroc.x+ coords[1]*(auroc.length_axis)), (auroc.y - coords[0]*(auroc.length_axis)))
+  line(width_scatter, t*height, (auprc.x+ coords[0]*(auprc.length_axis)), (auprc.y - coords[2]*(auprc.length_axis)))
   pop()
 
   auroc.draw_plot(threshold, coords[1], coords[0], time)
