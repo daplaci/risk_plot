@@ -9,6 +9,7 @@ var total_height = 600
 var total_patients = 600
 var time = 0;
 var speed = 1/30
+var increment = 1;
 
 class Patient{
   constructor(is_positive){
@@ -134,7 +135,7 @@ function setup() {
   for (var i = 0; i < total_patients; i++){
     pt.push(new Patient(false))
   }
-  for (var i = 0; i < total_patients*prevalence; i++){
+  for (var i = 0; i < total_patients*0.5; i++){
     pt.push(new Patient(true))
   }
   slider = createSlider(0, 0.5, 0, 0.005);
@@ -181,7 +182,13 @@ function draw() {
   auroc.draw_plot(threshold, coords[1], coords[0], time)
   auprc.draw_plot(threshold, coords[0], coords[2], time)
   
-  time += (PI/4)*speed; //time step update threshold at next time step
+  if (increment>0){
+    time += (PI/4)*speed; //time step update threshold at next time step
+  }
+}
+
+function mousePressed(){
+  increment = increment * -1
 }
 
 function get_roc_coordinates(t){
