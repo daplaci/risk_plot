@@ -4,7 +4,8 @@
 let slider 
 var left_margin = 60
 var width_scatter = 600
-var prevalence = 0.5
+var total_width = 1600
+var total_height = 800
 var total_patients = 600
 var time = 0;
 var speed = 1/30
@@ -128,17 +129,18 @@ function clear_plot(){
 
 function setup() {
   console.log("Starting")
-  createCanvas(1600, 800);
+  createCanvas(total_width, total_height);
+  positives = createSlider(1, total_patients/2, total_patients/2, 1);
+  positives.position(580, height+50);
+  positives.style('width', '80px');
+  
   pt = new Array()
   for (var i = 0; i < total_patients; i++){
     pt.push(new Patient(false))
   }
-  for (var i = 0; i < total_patients*prevalence; i++){
+  for (var i = 0; i < total_patients/2; i++){
     pt.push(new Patient(true))
   }
-  slider = createSlider(0, 0.5, 0, 0.005);
-  slider.position(580, height+50);
-  slider.style('width', '80px');
   
   auroc = new Plot(width_scatter+100, height-15,'TPR', 'FPR'); 
   auprc = new Plot(width_scatter+100, height/2,'Precision', 'Recall'); 
@@ -149,8 +151,26 @@ function setup() {
 
 function draw() {
   background(255)
-  let threshold = slider.value();
-    
+  let threshold = 0.4
+  let counter = 0
+  for (var i = 0; i < pt.length; i++){ //plot patients
+    if (pt[i].is_positive){
+      counter += 1
+    }
+  }
+
+  if (counter > positives.value()){
+    //pop n patients
+    for (var i = 0; i < (counter - positives.value()); i++){
+      pt.pop()
+    }
+  } else {
+    //push n patients
+    for (var i = 0; i < (positives.value() - counter); i++){
+      pt.push(new Patient(true))
+    }
+  }
+
   for (var i = 0; i < pt.length; i++){ //plot patients
     pt[i].show(threshold)
   }
@@ -176,8 +196,8 @@ function draw() {
   line(width_scatter, t*height, (auroc.x+ coords[1]*(auroc.length_axis)), (auroc.y - coords[0]*(auroc.length_axis)))
   pop()
 
-  auroc.draw_plot(threshold, coords[1], coords[0], time)
-  auprc.draw_plot(threshold, coords[0], coords[2], time)
+  auroc.draw_plot(positives.value(), coords[1], coords[0], time)
+  auprc.draw_plot(positives.value(), coords[0], coords[2], time)
   
   time += (PI/4)*speed; //time step update threshold at next time step
 }
