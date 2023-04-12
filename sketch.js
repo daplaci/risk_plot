@@ -133,6 +133,8 @@ function clear_plot(){
   auroc.completed_curves = {};
   auprc.curve = {};
   auprc.completed_curves = {};
+  calibration.curve = {};
+  calibration.completed_curve = {};
 }
 
 function setup() {
