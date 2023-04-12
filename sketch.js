@@ -2,13 +2,13 @@
 // Davide Placido
 
 let slider 
-var left_margin = 450
-var width_scatter = 600
-var length_axis = 280
-var margin_axis_scatter = 100
-var total_width = 1600
-var total_height = 700
-var height_scatter = 600
+var left_margin = 220
+var width_scatter = 400
+var height_scatter = 400
+var length_axis = 150
+var margin_axis_scatter = 50
+var total_width = 900
+var total_height = 600
 var height_distributions = 250
 var total_patients = 1000
 var time = 0;
