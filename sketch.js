@@ -165,7 +165,7 @@ function setup() {
 
   auroc = new Plot(left_margin - length_axis - margin_axis_scatter, height_scatter-15,'TPR', 'FPR'); 
   auprc = new Plot(left_margin - length_axis - margin_axis_scatter, height_scatter/2,'Precision', 'Recall');
-  calibration = new Plot(left_margin + width_scatter + margin_axis_scatter, height_scatter/2, 'Predicted Probability', 'Observed Probability');
+  calibration = new Plot(left_margin + width_scatter + margin_axis_scatter, height_scatter/2, 'Observed Probability', 'Predicted Probability');
   clearButton = createButton('Clear');
   clearButton.position(left_margin, height_scatter+110);
   clearButton.mousePressed(clear_plot);
