@@ -2,17 +2,22 @@
 // Davide Placido
 
 let slider 
-var left_margin = 220
-var width_scatter = 400
-var height_scatter = 400
-var length_axis = 150
+var left_margin = 290
+var upper_margin = 50
+
+var width_scatter = 500
+var height_scatter = 500
+
+var length_axis = 220
 var margin_axis_scatter = 50
-var total_width = 900
+
+var total_width = 1200
 var total_height = 600
+
 var height_distributions = 250
 var total_patients = 1000
 var time = 0;
-var speed = 1/60
+var speed = 1/80;
 var increment = 1;
 
 class Patient{
@@ -74,7 +79,10 @@ class Plot{
     push()
     fill(0)
     strokeWeight(1)
-    text(this.ylabel, +15, -this.length_axis +10)
+    text('1', -15, -this.length_axis + 25) //1
+    text('1', this.length_axis -25, 15) //1
+    text('0', -6, 12)
+    text(this.ylabel, +15, -this.length_axis)
     pop()
     
     line(0, 0, this.length_axis, 0) //xaxis - length heigth
@@ -82,7 +90,7 @@ class Plot{
     push()
     fill(0)
     strokeWeight(1)
-    text(this.xlabel, this.length_axis - 10, -15)
+    text(this.xlabel, this.length_axis, -15)
     pop()
 
     if (cos(time)*sin(time)>0){
@@ -134,7 +142,7 @@ function clear_plot(){
   auprc.curve = {};
   auprc.completed_curves = {};
   calibration.curve = {};
-  calibration.completed_curve = {};
+  calibration.completed_curves = {};
 }
 
 function setup() {
@@ -168,8 +176,8 @@ function draw() {
   push()
   fill(0)
   stroke(1)
-  text('Discrimination', slider.x + slider.width+10, slider.y +15);
-  text('Prevalence', positives.x + positives.width+10, positives.y +15);
+  text('Class Separation', slider.x + slider.width+10, slider.y +15);
+  text('Class Balance', positives.x + positives.width+10, positives.y +15);
   pop()
   
   let threshold = slider.value();
